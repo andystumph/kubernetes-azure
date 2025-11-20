@@ -1,0 +1,52 @@
+---
+- name: Configure all nodes with common setup
+  hosts: all
+  become: yes
+  gather_facts: yes
+  roles:
+    - common
+
+- name: Configure RKE2 server (control plane)
+  hosts: control_plane
+  become: yes
+  gather_facts: yes
+  vars:
+    rke2_token: "{{ lookup('env', 'RKE2_TOKEN') }}"
+    rke2_version: "{{ lookup('env', 'RKE2_VERSION') | default('v1.28.5+rke2r1', true) }}"
+  roles:
+    - rke2-server
+
+- name: Configure RKE2 agents (workers)
+  hosts: workers
+  become: yes
+  gather_facts: yes
+  vars:
+    rke2_token: "{{ lookup('env', 'RKE2_TOKEN') }}"
+    rke2_version: "{{ lookup('env', 'RKE2_VERSION') | default('v1.28.5+rke2r1', true) }}"
+    rke2_server_ip: "{{ hostvars[groups['control_plane'][0]]['private_ip'] }}"
+  roles:
+    - rke2-agent
+
+- name: Fetch kubeconfig from control plane
+  hosts: control_plane
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Wait for kubeconfig to be generated
+      wait_for:
+        path: /etc/rancher/rke2/rke2.yaml
+        timeout: 300
+
+    - name: Fetch kubeconfig
+      fetch:
+        src: /etc/rancher/rke2/rke2.yaml
+        dest: "{{ playbook_dir }}/../../kubeconfig"
+        flat: yes
+
+    - name: Update kubeconfig server address
+      delegate_to: localhost
+      become: no
+      replace:
+        path: "{{ playbook_dir }}/../../kubeconfig"
+        regexp: 'https://127\.0\.0\.1:6443'
+        replace: "https://{{ ansible_host }}:6443"

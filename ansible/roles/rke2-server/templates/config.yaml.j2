@@ -1,0 +1,30 @@
+token: {{ rke2_token }}
+write-kubeconfig-mode: "0644"
+tls-san:
+  - {{ ansible_host }}
+  - {{ private_ip }}
+node-name: {{ inventory_hostname }}
+cluster-cidr: 10.42.0.0/16
+service-cidr: 10.43.0.0/16
+cluster-dns: 10.43.0.10
+
+# Security settings
+secrets-encryption: true
+protect-kernel-defaults: true
+profile: cis-1.23
+
+# Network settings
+cni: cilium
+
+# Disable components not needed
+disable:
+  - rke2-ingress-nginx
+
+# Enable components
+kube-apiserver-arg:
+  - "audit-log-path=/var/lib/rancher/rke2/server/logs/audit.log"
+  - "audit-log-maxage=30"
+  - "audit-log-maxbackup=10"
+  - "audit-log-maxsize=100"
+  - "authorization-mode=RBAC,Node"
+  - "enable-admission-plugins=NodeRestriction,ServiceAccount"

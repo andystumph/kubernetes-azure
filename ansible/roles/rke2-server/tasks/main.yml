@@ -1,0 +1,93 @@
+- name: Create RKE2 config directory
+  ansible.builtin.file:
+    path: /etc/rancher/rke2
+    state: directory
+    mode: '0755'
+
+- name: Create RKE2 server config
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: /etc/rancher/rke2/config.yaml
+    mode: '0600'
+
+- name: Download RKE2 installation script
+  ansible.builtin.get_url:
+    url: https://get.rke2.io
+    dest: /tmp/rke2-install.sh
+    mode: '0755'
+
+- name: Install RKE2 server
+  ansible.builtin.shell: |
+    INSTALL_RKE2_VERSION={{ rke2_version }} \
+    INSTALL_RKE2_TYPE=server \
+    /tmp/rke2-install.sh
+  args:
+    creates: /usr/local/bin/rke2
+
+- name: Create RKE2 server service directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/rke2-server.service.d
+    state: directory
+    mode: '0755'
+
+- name: Create etcd group
+  ansible.builtin.group:
+    name: etcd
+    system: yes
+    state: present
+
+- name: Create etcd user
+  ansible.builtin.user:
+    name: etcd
+    group: etcd
+    system: yes
+    create_home: no
+    shell: /sbin/nologin
+    state: present
+
+- name: Enable and start RKE2 server
+  ansible.builtin.systemd:
+    name: rke2-server
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Wait for RKE2 to be ready
+  ansible.builtin.wait_for:
+    path: /var/lib/rancher/rke2/server/node-token
+    timeout: 300
+
+- name: Add kubectl to PATH
+  ansible.builtin.copy:
+    dest: /etc/profile.d/rke2.sh
+    content: |
+      export PATH=$PATH:/var/lib/rancher/rke2/bin
+      export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+    mode: '0644'
+
+- name: Create kubectl symlink
+  ansible.builtin.file:
+    src: /var/lib/rancher/rke2/bin/kubectl
+    dest: /usr/local/bin/kubectl
+    state: link
+
+- name: Wait for Kubernetes API to be available
+  ansible.builtin.shell: |
+    export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+    /var/lib/rancher/rke2/bin/kubectl get nodes
+  register: kubectl_result
+  until: kubectl_result.rc == 0
+  retries: 30
+  delay: 10
+  changed_when: false
+
+- name: Display cluster status
+  ansible.builtin.shell: |
+    export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+    /var/lib/rancher/rke2/bin/kubectl get nodes
+  register: cluster_status
+  changed_when: false
+
+- name: Show cluster status
+  ansible.builtin.debug:
+    var: cluster_status.stdout_lines

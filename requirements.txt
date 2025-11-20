@@ -1,0 +1,22 @@
+# Python requirements for Ansible Azure collection
+# Required for azure.azcollection dynamic inventory and modules
+
+# Azure SDK for Python
+azure-cli-core>=2.40.0
+azure-common>=1.1.28
+azure-identity>=1.12.0
+azure-mgmt-compute>=30.0.0
+azure-mgmt-core>=1.3.0
+azure-mgmt-network>=23.0.0
+azure-mgmt-resource>=22.0.0
+azure-mgmt-storage>=21.0.0
+
+# MSAL for authentication
+msal>=1.20.0
+msal-extensions>=1.0.0
+
+# Additional dependencies
+packaging>=21.0
+requests>=2.31.0
+msrest>=0.7.1
+msrestazure>=0.6.4

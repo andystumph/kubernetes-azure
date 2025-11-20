@@ -1,0 +1,35 @@
+name: kubernetes-azure
+metadata:
+  template: kubernetes-azure@0.0.1
+        
+infra:
+  provider: terraform
+  path: ./terraform
+  # NOTE: The 'inputs:' block is intentionally omitted for Terraform.
+  # For Terraform templates, azd does NOT translate 'inputs' into variable values.
+  # Instead, Terraform variables must be provided via:
+  #   1. Environment variables prefixed with TF_VAR_
+  #   2. A *.tfvars file in the working directory
+  # Required variable with no default: ssh_public_key
+  # Set it BEFORE running 'azd up' with:
+  #   azd env set TF_VAR_ssh_public_key "$(cat ~/.ssh/id_rsa.pub)"
+
+hooks:
+  preprovision:
+    posix:
+      shell: sh
+      run: sh scripts/preprovision.sh
+  postprovision:
+    posix:
+      shell: sh
+      run: |
+        echo "[azure.yaml] Entering postprovision hook" 
+        echo "$(date +'%Y-%m-%dT%H:%M:%S%z') postprovision invoked" >> hook-execution.log
+        sh scripts/postprovision-ansible.sh
+  postdown:
+    posix:
+      shell: sh
+      run: |
+        echo "Cleaning up local artifacts..."
+        rm -f ansible/inventory/azure_rm.yml
+        rm -f kubeconfig

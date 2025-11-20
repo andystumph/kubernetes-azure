@@ -1,0 +1,42 @@
+{
+  "name": "Kubernetes-Azure IaC",
+  "image": "astumph/iac:latest",
+  "features": {},
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "hashicorp.terraform",
+        "redhat.ansible",
+        "ms-azuretools.vscode-azurecli",
+        "ms-azuretools.azure-dev",
+        "ms-vscode.azurecli"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "files.associations": {
+          "*.tf": "terraform",
+          "*.tfvars": "terraform"
+        }
+      }
+    }
+  },
+  "postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y jq && curl -fsSL https://aka.ms/install-azd.sh | bash && curl -LO \"https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl\" && sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl && ansible-galaxy collection install azure.azcollection --force && pip install --break-system-packages -r requirements.txt && terraform version && ansible --version && azd version && kubectl version --client",
+  "remoteEnv": {
+    "ANSIBLE_HOST_KEY_CHECKING": "False"
+  },
+  // Platform-specific mounts configuration
+  // Windows: Uses USERPROFILE environment variable
+  "mounts": [
+    "source=${localEnv:USERPROFILE}/.azure,target=/home/iac/.azure,type=bind,consistency=cached"
+  ],
+  // For Linux/Mac, use this mount configuration instead:
+  // "mounts": [
+  //   "source=${localEnv:HOME}/.azure,target=/home/iac/.azure,type=bind,consistency=cached"
+  // ],
+  // 
+  // Optional: Mount .env file (create from .env.example first)
+  // Add this to the mounts array if you need to share .env file with container:
+  // "source=${localWorkspaceFolder}/.env,target=/workspaces/${localWorkspaceFolderBasename}/.env,type=bind,consistency=cached"
+  "forwardPorts": [],
+  "remoteUser": "iac"
+}

@@ -1,0 +1,40 @@
+---
+# See https://ansible-lint.readthedocs.io/en/latest/configuring/
+
+profile: production  # Use production profile for strict checking
+
+# Exclude certain paths
+exclude_paths:
+  - .cache/
+  - .github/
+  - test/
+  - molecule/
+
+# Enable checking of role defaults
+use_default_rules: true
+
+# Skip specific rules if needed (commented out - enable as needed)
+# skip_list:
+#   - yaml[line-length]  # Allow longer lines in specific cases
+
+# Additional rules to enable
+enable_list:
+  - args
+  - empty-string-compare
+  - no-log-password
+  - no-same-owner
+  - name[prefix]
+  - yaml
+
+# Warn instead of error for these rules (if needed)
+warn_list:
+  - experimental
+  - role-name
+  - galaxy[version-incorrect]
+
+# Configure specific rules
+# Note: Detailed rule configuration is done via profiles
+# Individual rule settings can be adjusted as needed
+
+# Offline mode (don't check galaxy)
+offline: true
