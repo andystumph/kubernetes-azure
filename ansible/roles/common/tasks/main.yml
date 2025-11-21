@@ -19,8 +19,9 @@
     state: present
 
 - name: Disable swap
-  ansible.builtin.shell:
+  ansible.builtin.command: swapoff -a
   when: ansible_swaptotal_mb > 0
+  changed_when: false
 
 - name: Remove swap from fstab
   ansible.builtin.lineinfile:
@@ -42,6 +43,7 @@
     content: |
       overlay
       br_netfilter
+    mode: '0644'
 
 - name: Configure sysctl for Kubernetes
   ansible.posix.sysctl:
