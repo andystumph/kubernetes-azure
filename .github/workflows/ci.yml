@@ -10,7 +10,7 @@ on:
 
 env:
   TERRAFORM_VERSION: 1.9.8
-  ANSIBLE_VERSION: 2.15.0
+  ANSIBLE_CORE_VERSION: 2.15.0
   PYTHON_VERSION: 3.11
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
     defaults:
       run:
         working-directory: ./terraform
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,7 +54,7 @@ jobs:
   terraform-security:
     name: Terraform Security Scan
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -76,7 +76,7 @@ jobs:
   ansible-lint:
     name: Ansible Linting
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -88,7 +88,7 @@ jobs:
 
       - name: Install Ansible and ansible-lint
         run: |
-          pip install ansible==${{ env.ANSIBLE_VERSION }} ansible-lint
+          pip install ansible-core==${{ env.ANSIBLE_CORE_VERSION }} ansible-lint
 
       - name: Run ansible-lint
         run: |
@@ -103,7 +103,7 @@ jobs:
   ansible-security:
     name: Ansible Security Scan
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -124,7 +124,7 @@ jobs:
   shell-scripts:
     name: Shell Script Validation
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -151,7 +151,7 @@ jobs:
   markdown-lint:
     name: Markdown Linting
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -164,7 +164,7 @@ jobs:
   yaml-lint:
     name: YAML Validation
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -185,7 +185,7 @@ jobs:
   secrets-scan:
     name: Secrets Detection
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -200,7 +200,7 @@ jobs:
   documentation-check:
     name: Documentation Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -216,14 +216,14 @@ jobs:
             "docs/TROUBLESHOOTING.md"
             ".env.example"
           )
-          
+
           missing_files=()
           for file in "${required_files[@]}"; do
             if [ ! -f "$file" ]; then
               missing_files+=("$file")
             fi
           done
-          
+
           if [ ${#missing_files[@]} -ne 0 ]; then
             echo "Error: Missing required documentation files:"
             printf '%s\n' "${missing_files[@]}"
@@ -242,7 +242,7 @@ jobs:
   dependency-check:
     name: Dependency Security Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -264,7 +264,7 @@ jobs:
     name: Integration Validation
     runs-on: ubuntu-latest
     needs: [terraform-validate, ansible-lint, shell-scripts]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -276,13 +276,13 @@ jobs:
             echo "Error: azure.yaml not found"
             exit 1
           fi
-          
+
           echo "Checking terraform outputs match ansible requirements..."
           # Verify that terraform outputs provide what ansible needs
           if ! grep -q "ansible_inventory" terraform/outputs.tf; then
             echo "Warning: Terraform may not output ansible inventory data"
           fi
-          
+
           echo "✓ Integration checks passed"
 
       - name: Validate environment variables documentation
@@ -291,7 +291,7 @@ jobs:
             echo "Error: .env.example file missing"
             exit 1
           fi
-          
+
           # Check that required vars are documented
           required_vars=(
             "AZURE_SUBSCRIPTION_ID"
@@ -301,26 +301,26 @@ jobs:
             "RKE2_TOKEN"
             "SSH_PUBLIC_KEY"
           )
-          
+
           missing_vars=()
           for var in "${required_vars[@]}"; do
             if ! grep -q "$var" .env.example; then
               missing_vars+=("$var")
             fi
           done
-          
+
           if [ ${#missing_vars[@]} -ne 0 ]; then
             echo "Error: Missing required variables in .env.example:"
             printf '%s\n' "${missing_vars[@]}"
             exit 1
           fi
-          
+
           echo "✓ All required environment variables documented"
 
   all-checks-complete:
     name: All Checks Passed
     runs-on: ubuntu-latest
-    needs: 
+    needs:
       - terraform-validate
       - terraform-security
       - ansible-lint
@@ -332,7 +332,7 @@ jobs:
       - documentation-check
       - dependency-check
       - integration-check
-    
+
     steps:
       - name: Summary
         run: |
