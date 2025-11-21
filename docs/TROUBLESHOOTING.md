@@ -127,9 +127,8 @@ print -r -- "$TF_VAR_ssh_public_key" | head -c80
 
 **Avoid Anti-Patterns:**
 - Don’t rely solely on exporting inside pre-provision hooks; azd resolves variables before hooks run.
-- Don’t split the SSH key across lines; it must be a single line.
-- Don’t remove the `ssh-rsa` prefix.
-
+- Don't split the SSH key across lines; it must be a single line.
+- Don't remove the `ssh-rsa` prefix.
 
 **Symptoms:**
 

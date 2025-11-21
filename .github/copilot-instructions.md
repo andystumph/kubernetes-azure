@@ -90,7 +90,6 @@ This project provisions and configures a Kubernetes cluster on Azure using RKE2,
 
 Required environment variables (document in `.env.example`):
 
-
 - `AZURE_SUBSCRIPTION_ID`: Azure subscription ID
 - `AZURE_TENANT_ID`: Azure tenant ID
 - `ARM_CLIENT_ID`: Service principal client ID (for Terraform)
