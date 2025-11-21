@@ -42,7 +42,6 @@
     group: etcd
     system: true
     create_home: false
-    ansible.builtin.shell:
     state: present
 
 - name: Enable and start RKE2 server

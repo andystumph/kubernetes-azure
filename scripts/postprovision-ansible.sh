@@ -60,6 +60,9 @@ if ! command -v ansible-playbook >/dev/null 2>&1; then
   exit 1
 fi
 
+# Ensure inventory directory exists prior to generation or permission adjustments
+mkdir -p "${ROOT_DIR}/ansible/inventory"
+
 # Generate static inventory from Terraform outputs
 log "Generating static Ansible inventory from Terraform outputs..."
 if [ -x "${ROOT_DIR}/scripts/generate-inventory.sh" ]; then
@@ -77,6 +80,7 @@ log "Working directory: $(pwd)"
 
 # Normalize permissions to prevent Ansible from treating inventory as executable script.
 chmod 755 . 2>/dev/null || true
+chmod 755 inventory 2>/dev/null || true
 chmod 644 inventory/azure_rm.yml 2>/dev/null || true
 chmod 644 inventory/hosts.yml 2>/dev/null || true
 log "Normalized directory and inventory permissions"

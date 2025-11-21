@@ -31,5 +31,5 @@ hooks:
       shell: sh
       run: |
         echo "Cleaning up local artifacts..."
-        rm -f ansible/inventory/azure_rm.yml
+        rm -f ansible/inventory/hosts.yml
         rm -f kubeconfig

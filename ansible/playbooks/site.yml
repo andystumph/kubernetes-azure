@@ -49,4 +49,4 @@
       ansible.builtin.replace:
         path: "{{ playbook_dir }}/../../kubeconfig"
         regexp: 'https://127\.0\.0\.1:6443'
-        ansible.builtin.replace:
+        replace: 'https://{{ hostvars[groups["control_plane"][0]]["ansible_host"] }}:6443'
