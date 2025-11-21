@@ -11,8 +11,8 @@
   become: true
   gather_facts: true
   vars:
-    rke2_token: "{{lookup('env', 'RKE2_TOKEN')}}"
-    rke2_version: "{{lookup('env', 'RKE2_VERSION') | default('v1.28.5+rke2r1', true)}}"
+    rke2_token: "{{ lookup('env', 'RKE2_TOKEN') }}"
+    rke2_version: "{{ lookup('env', 'RKE2_VERSION') | default('v1.28.5+rke2r1', true) }}"
   roles:
     - rke2-server
 
@@ -21,9 +21,9 @@
   become: true
   gather_facts: true
   vars:
-    rke2_token: "{{lookup('env', 'RKE2_TOKEN')}}"
-    rke2_version: "{{lookup('env', 'RKE2_VERSION') | default('v1.28.5+rke2r1', true)}}"
-    rke2_server_ip: "{{hostvars[groups['control_plane'][0]]['private_ip']}}"
+    rke2_token: "{{ lookup('env', 'RKE2_TOKEN') }}"
+    rke2_version: "{{ lookup('env', 'RKE2_VERSION') | default('v1.28.5+rke2r1', true) }}"
+    rke2_server_ip: "{{ hostvars[groups['control_plane'][0]]['private_ip'] }}"
   roles:
     - rke2-agent
 
@@ -40,13 +40,13 @@
     - name: Fetch kubeconfig
       ansible.builtin.fetch:
         src: /etc/rancher/rke2/rke2.yaml
-        dest: "{{playbook_dir}}/../../kubeconfig"
+        dest: "{{ playbook_dir }}/../../kubeconfig"
         flat: true
 
     - name: Update kubeconfig server address
       delegate_to: localhost
       become: false
       ansible.builtin.replace:
-        path: "{{playbook_dir}}/../../kubeconfig"
+        path: "{{ playbook_dir }}/../../kubeconfig"
         regexp: 'https://127\.0\.0\.1:6443'
         ansible.builtin.replace:

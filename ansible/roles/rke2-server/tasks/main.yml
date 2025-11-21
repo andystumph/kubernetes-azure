@@ -18,7 +18,7 @@
 
 - name: Install RKE2 server
   ansible.builtin.shell: |
-    INSTALL_RKE2_VERSION={{rke2_version}} \
+    INSTALL_RKE2_VERSION={{ rke2_version }} \
     INSTALL_RKE2_TYPE=server \
     /tmp/rke2-install.sh
   args:
