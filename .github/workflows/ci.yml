@@ -90,6 +90,10 @@ jobs:
         run: |
           pip install ansible-core==${{ env.ANSIBLE_CORE_VERSION }} ansible-lint
 
+      - name: Install Ansible collections
+        run: |
+          ansible-galaxy collection install community.general ansible.posix
+
       - name: Run ansible-lint
         run: |
           cd ansible
