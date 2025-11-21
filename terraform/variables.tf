@@ -26,7 +26,7 @@ variable "vm_count" {
   description = "Total number of VMs (1 control plane + N-1 workers)"
   type        = number
   default     = 3
-  
+
   validation {
     condition     = var.vm_count >= 2
     error_message = "VM count must be at least 2 (1 control plane + 1 worker)."

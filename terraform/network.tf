@@ -48,3 +48,9 @@ resource "azurerm_network_interface_security_group_association" "vm" {
   network_interface_id      = azurerm_network_interface.vm[count.index].id
   network_security_group_id = count.index == 0 ? azurerm_network_security_group.control_plane.id : azurerm_network_security_group.worker.id
 }
+
+# Associate NSG with subnet for CKV2_AZURE_31 compliance
+resource "azurerm_subnet_network_security_group_association" "main" {
+  subnet_id                 = azurerm_subnet.main.id
+  network_security_group_id = azurerm_network_security_group.control_plane.id
+}

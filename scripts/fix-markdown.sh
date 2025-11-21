@@ -54,7 +54,7 @@ fix_eof() {
 }
 
 # Process all markdown files
-for file in $(find . -name "*.md" -not -path "./.git/*" -not -path "./node_modules/*"); do
+find . -name "*.md" -not -path "./.git/*" -not -path "./node_modules/*" -print0 | while IFS= read -r -d '' file; do
     echo "Processing $file..."
     
     # Make a backup

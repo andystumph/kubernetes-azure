@@ -1,0 +1,8 @@
+# Checkov configuration for skipping specific checks
+# These are intentional design decisions or false positives
+
+skip-check:
+  # CKV_AZURE_50: We intentionally allow VM extension capability
+  # but do not use it. Extensions are not installed in our infrastructure.
+  # This is a capability check, not a usage check.
+  - CKV_AZURE_50
