@@ -30,6 +30,14 @@ ansible.cfg text eol=lf
 *.conf text eol=lf
 *.config text eol=lf
 
+# Dev container files use LF
+devcontainer.json text eol=lf
+.devcontainer/** text eol=lf
+
+# GitHub files use LF
+.github/** text eol=lf
+copilot-instructions.md text eol=lf
+
 # JSON files use LF
 *.json text eol=lf
 
