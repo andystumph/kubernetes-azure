@@ -18,7 +18,7 @@
 
 - name: Install RKE2 server
   ansible.builtin.shell: |
-    INSTALL_RKE2_VERSION={{ rke2_version }} \
+    INSTALL_RKE2_VERSION={{rke2_version}} \
     INSTALL_RKE2_TYPE=server \
     /tmp/rke2-install.sh
   args:
@@ -33,24 +33,24 @@
 - name: Create etcd group
   ansible.builtin.group:
     name: etcd
-    system: yes
+    system: true
     state: present
 
 - name: Create etcd user
   ansible.builtin.user:
     name: etcd
     group: etcd
-    system: yes
-    create_home: no
-    shell: /sbin/nologin
+    system: true
+    create_home: false
+    ansible.builtin.shell:
     state: present
 
 - name: Enable and start RKE2 server
   ansible.builtin.systemd:
     name: rke2-server
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
 
 - name: Wait for RKE2 to be ready
   ansible.builtin.wait_for:

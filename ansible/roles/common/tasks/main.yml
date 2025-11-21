@@ -1,11 +1,11 @@
 ---
 - name: Update apt cache
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
+    update_cache: true
     cache_valid_time: 3600
 
 - name: Install required packages
-  apt:
+  ansible.builtin.apt:
     name:
       - curl
       - wget
@@ -19,37 +19,37 @@
     state: present
 
 - name: Disable swap
-  shell: swapoff -a
+  ansible.builtin.shell:
   when: ansible_swaptotal_mb > 0
 
 - name: Remove swap from fstab
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/fstab
     regexp: '^.*swap.*$'
     state: absent
 
 - name: Load kernel modules
-  modprobe:
-    name: "{{ item }}"
+  community.general.modprobe:
+    name: "{{item}}"
     state: present
   loop:
     - overlay
     - br_netfilter
 
 - name: Ensure kernel modules load on boot
-  copy:
+  ansible.builtin.copy:
     dest: /etc/modules-load.d/k8s.conf
     content: |
       overlay
       br_netfilter
 
 - name: Configure sysctl for Kubernetes
-  sysctl:
-    name: "{{ item.key }}"
-    value: "{{ item.value }}"
-    sysctl_set: yes
+  ansible.posix.sysctl:
+    name: "{{item.key}}"
+    value: "{{item.value}}"
+    sysctl_set: true
     state: present
-    reload: yes
+    reload: true
   loop:
     - { key: 'net.bridge.bridge-nf-call-iptables', value: '1' }
     - { key: 'net.bridge.bridge-nf-call-ip6tables', value: '1' }
@@ -59,20 +59,20 @@
     - { key: 'kernel.panic_on_oops', value: '1' }
 
 - name: Configure firewall (ufw)
-  ufw:
+  community.general.ufw:
     state: disabled
 
 - name: Set timezone to UTC
-  timezone:
+  community.general.timezone:
     name: UTC
 
 - name: Configure NTP
-  apt:
+  ansible.builtin.apt:
     name: chrony
     state: present
 
 - name: Start and enable chronyd
-  systemd:
+  ansible.builtin.systemd:
     name: chrony
     state: started
-    enabled: yes
+    enabled: true

@@ -1,7 +1,7 @@
 name: kubernetes-azure
 metadata:
   template: kubernetes-azure@0.0.1
-        
+
 infra:
   provider: terraform
   path: ./terraform
@@ -23,7 +23,7 @@ hooks:
     posix:
       shell: sh
       run: |
-        echo "[azure.yaml] Entering postprovision hook" 
+        echo "[azure.yaml] Entering postprovision hook"
         echo "$(date +'%Y-%m-%dT%H:%M:%S%z') postprovision invoked" >> hook-execution.log
         sh scripts/postprovision-ansible.sh
   postdown:
