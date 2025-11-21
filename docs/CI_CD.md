@@ -22,6 +22,7 @@ The current status of the CI pipeline is displayed in the README badge:
 - `tflint`: Advanced linting for Terraform best practices
 
 **Local execution**:
+
 ```bash
 cd terraform
 terraform fmt -check -recursive
@@ -29,6 +30,7 @@ terraform init -backend=false
 terraform validate
 
 # Install and run tflint
+
 curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
 tflint --init
 tflint
@@ -43,20 +45,28 @@ tflint
 - **Checkov**: Policy-as-code scanner that detects security and compliance issues
 
 **Local execution**:
+
 ```bash
+
 # Install tfsec
+
 brew install tfsec  # macOS
+
 # or
+
 curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
 
 # Run tfsec
+
 cd terraform
 tfsec .
 
 # Install Checkov
+
 pip install checkov
 
 # Run Checkov
+
 checkov -d terraform --framework terraform
 ```
 
@@ -76,15 +86,20 @@ checkov -d terraform --framework terraform
 - `ansible-playbook --syntax-check`: Validates YAML syntax
 
 **Local execution**:
+
 ```bash
+
 # Install ansible-lint
+
 pip install ansible ansible-lint
 
 # Run ansible-lint
+
 cd ansible
 ansible-lint playbooks/site.yml
 
 # Check syntax
+
 ansible-playbook playbooks/site.yml --syntax-check
 ```
 
@@ -98,6 +113,7 @@ ansible-playbook playbooks/site.yml --syntax-check
 - Validates privilege escalation usage
 
 **Local execution**:
+
 ```bash
 cd ansible
 ansible-lint --profile production playbooks/site.yml
@@ -112,16 +128,23 @@ ansible-lint --profile production playbooks/site.yml
 - Permission verification for executable scripts
 
 **Local execution**:
+
 ```bash
+
 # Install shellcheck
+
 brew install shellcheck  # macOS
+
 # or
+
 sudo apt-get install shellcheck  # Ubuntu
 
 # Run shellcheck
+
 shellcheck scripts/*.sh
 
 # Check permissions
+
 ls -la scripts/*.sh
 ```
 
@@ -140,11 +163,15 @@ ls -la scripts/*.sh
 - Checks for broken links in documentation
 
 **Local execution**:
+
 ```bash
+
 # Install markdownlint-cli2
+
 npm install -g markdownlint-cli2
 
 # Run linter
+
 markdownlint-cli2 "**/*.md"
 ```
 
@@ -158,11 +185,15 @@ markdownlint-cli2 "**/*.md"
 - GitHub Actions workflows
 
 **Local execution**:
+
 ```bash
+
 # Install yamllint
+
 pip install yamllint
 
 # Run yamllint
+
 yamllint -d "{extends: default, rules: {line-length: {max: 120}}}" ansible/ azure.yaml .github/
 ```
 
@@ -174,12 +205,17 @@ yamllint -d "{extends: default, rules: {line-length: {max: 120}}}" ansible/ azur
 - **Gitleaks**: Scans git history for secrets and credentials
 
 **Local execution**:
+
 ```bash
+
 # Install gitleaks
+
 brew install gitleaks  # macOS
+
 # or download from https://github.com/gitleaks/gitleaks/releases
 
 # Run gitleaks
+
 gitleaks detect --source . --verbose
 ```
 
@@ -209,13 +245,17 @@ gitleaks detect --source . --verbose
 - Checks documentation is up-to-date
 
 **Local execution**:
+
 ```bash
+
 # Check required files
+
 for file in README.md GETTING_STARTED.md docs/SETUP.md docs/DEPLOYMENT.md docs/SECURITY.md docs/TROUBLESHOOTING.md .env.example; do
   [ -f "$file" ] && echo "✓ $file" || echo "✗ $file missing"
 done
 
 # Check markdown links
+
 npm install -g markdown-link-check
 find . -name "*.md" -exec markdown-link-check {} \;
 ```
@@ -228,12 +268,17 @@ find . -name "*.md" -exec markdown-link-check {} \;
 - **Trivy**: Comprehensive security scanner
 
 **Local execution**:
+
 ```bash
+
 # Install Trivy
+
 brew install aquasecurity/trivy/trivy  # macOS
+
 # or download from https://github.com/aquasecurity/trivy/releases
 
 # Run Trivy
+
 trivy config .
 ```
 
@@ -248,11 +293,15 @@ trivy config .
 - Required environment variables are present
 
 **Local execution**:
+
 ```bash
+
 # Run the validation script (if created)
+
 ./scripts/validate-setup.sh
 
 # Check environment variables
+
 required_vars=("AZURE_SUBSCRIPTION_ID" "AZURE_TENANT_ID" "ARM_CLIENT_ID" "ARM_CLIENT_SECRET" "RKE2_TOKEN" "SSH_PUBLIC_KEY")
 for var in "${required_vars[@]}"; do
   grep -q "$var" .env.example && echo "✓ $var" || echo "✗ $var missing"
@@ -270,6 +319,7 @@ The easiest way to run all CI checks locally is to use the provided script:
 ```
 
 This script will:
+
 - Check that all required tools are installed
 - Run all CI validations in the same order as GitHub Actions
 - Provide a clear summary of passed/failed checks
@@ -280,7 +330,9 @@ This script will:
 To run checks individually or if you prefer manual control:
 
 ```bash
+
 # 1. Terraform checks
+
 cd terraform
 terraform fmt -check -recursive
 terraform init -backend=false
@@ -290,24 +342,30 @@ tfsec .
 checkov -d . --framework terraform
 
 # 2. Ansible checks
+
 cd ../ansible
 ansible-lint playbooks/site.yml
 ansible-playbook playbooks/site.yml --syntax-check
 
 # 3. Shell script checks
+
 cd ..
 shellcheck scripts/*.sh
 
 # 4. YAML validation
+
 yamllint ansible/ azure.yaml .github/
 
 # 5. Markdown linting
+
 markdownlint-cli2 "**/*.md"
 
 # 6. Secrets scanning
+
 gitleaks detect --source . --verbose
 
 # 7. Security scanning
+
 trivy config .
 ```
 
@@ -315,7 +373,7 @@ trivy config .
 
 The workflow is organized into 11 parallel jobs plus a final summary job:
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │                   Pull Request / Push                │
 └─────────────────────────────────────────────────────┘
@@ -357,8 +415,11 @@ When a CI check fails:
 ### Common Failures and Fixes
 
 #### Terraform fmt failure
+
 ```bash
+
 # Auto-fix formatting
+
 cd terraform
 terraform fmt -recursive
 git add .
@@ -366,22 +427,32 @@ git commit -m "Fix Terraform formatting"
 ```
 
 #### Ansible lint failure
+
 ```bash
+
 # Review and fix issues
+
 cd ansible
 ansible-lint playbooks/site.yml
+
 # Address each issue, then commit
 ```
 
 #### Shellcheck warnings
+
 ```bash
+
 # Fix shell script issues
+
 shellcheck scripts/deploy.sh
+
 # Address warnings about quoting, error handling, etc.
 ```
 
 #### Secrets detected
+
 ```bash
+
 # NEVER commit the fix if secrets are exposed
 # Instead:
 # 1. Remove the secret from the code
@@ -403,6 +474,7 @@ git commit -m "docs: Update README [skip ci]"
 ## CI Performance
 
 Typical execution times:
+
 - **Fast checks** (~1-2 minutes): YAML, Markdown, Shell scripts
 - **Medium checks** (~2-4 minutes): Terraform validation, Ansible linting
 - **Slower checks** (~3-5 minutes): Security scans (tfsec, Checkov, Trivy)
@@ -412,6 +484,7 @@ Total pipeline execution: ~5-7 minutes (jobs run in parallel)
 ## Security Considerations
 
 The CI pipeline:
+
 - ✅ Never exposes secrets or credentials
 - ✅ Runs in isolated GitHub-hosted runners
 - ✅ Uses pinned versions of actions (e.g., `@v4`)
@@ -433,31 +506,39 @@ To add new checks:
 5. Provide local execution instructions
 
 Example:
+
 ```yaml
 new-check:
   name: New Validation
   runs-on: ubuntu-latest
   steps:
+
     - name: Checkout code
+
       uses: actions/checkout@v4
-    
+
     - name: Run new check
+
       run: |
+
         # Your validation command
 ```
 
 ## Troubleshooting
 
 ### Workflow not running
+
 - Check that the workflow file is in `.github/workflows/`
 - Verify the trigger conditions (`on: push` / `on: pull_request`)
 - Check branch protection rules
 
 ### Permission errors
+
 - GitHub Actions needs `contents: read` permissions (default)
 - For security uploads, `security-events: write` is granted automatically
 
 ### Cache issues
+
 - Clear runner cache: Re-run the workflow
 - For Terraform: Delete `.terraform` directory if needed
 

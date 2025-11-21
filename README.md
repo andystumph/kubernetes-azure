@@ -23,19 +23,26 @@ This project provisions a production-ready Kubernetes cluster on Azure using RKE
 ### 1. Setup Environment
 
 ```bash
+
 # Clone the repository
+
 git clone <repository-url>
 cd kubernetes-azure
 
 # Copy and configure environment variables
+
 cp .env.example .env
+
 # Edit .env with your Azure credentials and configuration
+
 vim .env
 
 # (Recommended) Load .env and persist Terraform SSH key variable for azd
+
 ./scripts/load-env-and-sync-azd.sh --verbose
 
 # OR manually if you prefer:
+
 set -a; . ./.env; set +a
 azd env set TF_VAR_ssh_public_key "$SSH_PUBLIC_KEY"
 ```
@@ -50,16 +57,20 @@ azd env set TF_VAR_ssh_public_key "$SSH_PUBLIC_KEY"
 ### 3. Deploy Infrastructure
 
 ```bash
+
 # Login to Azure
+
 az login
 
 # Initialize and deploy
 # Ensure Terraform variable is present (one-time)
+
 azd env get-values | grep TF_VAR_ssh_public_key || azd env set TF_VAR_ssh_public_key "$SSH_PUBLIC_KEY"
 azd up
 ```
 
 This will:
+
 - Provision Azure resources (VNet, VMs, NSGs, etc.)
 - Configure RKE2 Kubernetes cluster
 - Generate kubeconfig file
@@ -67,17 +78,20 @@ This will:
 ### 4. Access Your Cluster
 
 ```bash
+
 # Set kubeconfig
+
 export KUBECONFIG=$(pwd)/kubeconfig
 
 # Verify cluster
+
 kubectl get nodes
 kubectl cluster-info
 ```
 
 ## 📁 Project Structure
 
-```
+```text
 .
 ├── .devcontainer/          # Dev container configuration
 │   └── devcontainer.json
@@ -123,18 +137,20 @@ kubectl cluster-info
 The project is wired so that `azd` orchestrates Terraform (provision) and then Ansible (post-provision) via `azure.yaml`.
 
 ### Flow Overview
+
 1. Load environment variables (service principal, project settings) from `.env`.
 2. `azd provision` runs Terraform in `./terraform`.
 3. After Terraform succeeds, an Ansible playbook configures the VMs into an RKE2 cluster.
 4. `azd up` combines provision + (future) deploy phases.
 
 ### Required Environment Variables
+
 These must be populated in `.env` (see `.env.example`):
 
-- Azure auth: `AZURE_SUBSCRIPTION_ID`, `AZURE_TENANT_ID`, `ARM_CLIENT_ID`, `ARM_CLIENT_SECRET` (SP credentials)  
-- Infra metadata: `ENVIRONMENT`, `PROJECT_NAME`, `RESOURCE_GROUP_NAME`, `AZURE_LOCATION`  
-- Cluster: `VM_COUNT`, `RKE2_VERSION`, `RKE2_TOKEN`  
-- Access: `SSH_PUBLIC_KEY`  
+- Azure auth: `AZURE_SUBSCRIPTION_ID`, `AZURE_TENANT_ID`, `ARM_CLIENT_ID`, `ARM_CLIENT_SECRET` (SP credentials)
+- Infra metadata: `ENVIRONMENT`, `PROJECT_NAME`, `RESOURCE_GROUP_NAME`, `AZURE_LOCATION`
+- Cluster: `VM_COUNT`, `RKE2_VERSION`, `RKE2_TOKEN`
+- Access: `SSH_PUBLIC_KEY`
 
 Use the helper script to export and persist them:
 
@@ -150,16 +166,20 @@ azd env set TF_VAR_ssh_public_key "$SSH_PUBLIC_KEY"
 ```
 
 ### Supplying Terraform Variables
+
 Terraform prompts if `ssh_public_key` isn't set. Provide it via one of:
 
 1. Persisted azd environment variable (recommended): `azd env set TF_VAR_ssh_public_key "$SSH_PUBLIC_KEY"`
 2. Append to `terraform/terraform.tfvars` (HCL):
+
    ```hcl
    ssh_public_key = "${SSH_PUBLIC_KEY}"
    ```
+
 3. Create `terraform/main.tfvars.json` (JSON tfvars) generated from `.env` (a helper script `scripts/generate-tfvars-json.sh` can be extended to include this field).
 
 ### Common Commands
+
 ```bash
 azd env list                 # Show environments
 azd env new dev              # Create/select environment
@@ -170,18 +190,23 @@ azd show                     # Show current environment outputs
 ```
 
 ### Existing Resource Group Collision
+
 If `RESOURCE_GROUP_NAME` already exists (manually created or from a prior run) Terraform will halt with a message about importing the resource. Resolve by either:
 
-- Importing:  
+- Importing:
+
   ```bash
   terraform -chdir=terraform init
   terraform -chdir=terraform import azurerm_resource_group.main \
     "/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}"
   ```
+
 - Or choosing a new `RESOURCE_GROUP_NAME` in `.env` (e.g. append a numeric suffix) and re-running provision.
 
 ### Authentication Notes
+
 Terraform prefers the explicit ARM_* environment variables. Ensure these are exported; otherwise it falls back to Azure CLI interactive auth (causing msal errors inside the dev container). Minimum set:
+
 ```bash
 export ARM_CLIENT_ID=$ARM_CLIENT_ID
 export ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET
@@ -190,9 +215,11 @@ export ARM_TENANT_ID=$AZURE_TENANT_ID
 ```
 
 ### Hooks (Pre/Post Provision)
+
 Pre-provision logic (environment loading & tfvars generation) can run automatically via `hooks` in `azure.yaml`. If you encounter schema or YAML parsing issues, temporarily do manual exports (as above) and keep logic in scripts (`scripts/preprovision.sh`) for clarity.
 
 ### Troubleshooting Quick Reference
+
 | Symptom | Cause | Fix |
 |--------|-------|-----|
 | `terraform` prompts for `ssh_public_key` | `TF_VAR_ssh_public_key` not set before azd run | Run `./scripts/load-env-and-sync-azd.sh` or `azd env set TF_VAR_ssh_public_key "$SSH_PUBLIC_KEY"` |
@@ -201,20 +228,26 @@ Pre-provision logic (environment loading & tfvars generation) can run automatica
 | Hooks appear ignored | YAML schema / indentation issue | Simplify `azure.yaml`; call scripts directly |
 
 ### Safe Iteration Loop
+
 ```bash
 set -a; . ./.env; set +a
 export TF_VAR_ssh_public_key="$SSH_PUBLIC_KEY"
 azd provision   # or azd up
+
 # Make infra changes
+
 terraform -chdir=terraform plan
 azd provision   # re-run to apply via azd
 ```
 
 ### Cleanup & Cost Control
+
 Always run:
+
 ```bash
 azd down
 ```
+
 when finished experimenting; this removes the resource group (unless you imported an externally managed one).
 
 ---
@@ -253,16 +286,20 @@ See [docs/SECURITY.md](docs/SECURITY.md) for detailed security information.
 ## 🧪 Testing
 
 ```bash
+
 # Validate Terraform
+
 cd terraform
 terraform validate
 terraform plan
 
 # Check Ansible syntax
+
 cd ansible
 ansible-playbook --syntax-check playbooks/site.yml
 
 # Dry run Ansible
+
 ansible-playbook --check -i inventory/hosts.yml playbooks/site.yml
 ```
 
@@ -304,6 +341,7 @@ This project is provided as-is for educational and production use.
 ## 🆘 Support
 
 For issues and questions:
+
 1. Check [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
 2. Review logs: `azd show` or check individual Terraform/Ansible logs
 3. Open an issue with details and logs

@@ -7,6 +7,7 @@ This document outlines the security measures implemented in this project and rec
 ### Network Security
 
 #### Virtual Network Isolation
+
 - Dedicated VNet with custom address space (10.0.0.0/16)
 - Isolated subnet for Kubernetes nodes (10.0.1.0/24)
 - No direct internet access to worker nodes except via load balancer
@@ -25,8 +26,11 @@ This document outlines the security measures implemented in this project and rec
 - VNet Internal: All traffic within VNet allowed
 
 #### Recommendations for Production:
+
 ```terraform
+
 # In terraform/terraform.tfvars
+
 allowed_ssh_cidrs = ["YOUR_OFFICE_IP/32", "YOUR_VPN_IP/32"]
 allowed_k8s_api_cidrs = ["YOUR_OFFICE_IP/32", "YOUR_VPN_IP/32"]
 ```
@@ -74,8 +78,10 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
+
   - Ingress
 ---
+
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -84,27 +90,34 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
+
   - Ingress
+
   ingress:
+
   - from:
     - podSelector: {}
+
 ```
 
 ### Authentication & Authorization
 
 #### SSH Access
+
 - Public key authentication only
 - Password authentication disabled
 - Keys managed via environment variables
 - No hardcoded keys in code
 
 #### Kubernetes API Access
+
 - TLS required for all API communications
 - Client certificate authentication
 - kubeconfig with embedded certificates
 - Token-based authentication for service accounts
 
 #### Azure Authentication
+
 - Service Principal for Terraform
 - Managed Identities recommended for production
 - Credentials stored in `.env` (not in code)
@@ -130,15 +143,20 @@ spec:
 **Azure Key Vault Integration:**
 
 ```terraform
+
 # Example: Using Azure Key Vault
+
 data "azurerm_key_vault_secret" "rke2_token" {
   name         = "rke2-token"
   key_vault_id = azurerm_key_vault.main.id
 }
 
 # Pass to VMs securely
+
 resource "azurerm_linux_virtual_machine" "vm" {
+
   # ... other config
+
   custom_data = base64encode(templatefile("cloud-init.yaml", {
     rke2_token = data.azurerm_key_vault_secret.rke2_token.value
   }))
@@ -151,6 +169,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 - Rotate secrets regularly
 
 Example with External Secrets Operator:
+
 ```yaml
 apiVersion: external-secrets.io/v1beta1
 kind: SecretStore
@@ -170,11 +189,15 @@ spec:
 The cluster is configured to comply with CIS benchmarks:
 
 **Verify compliance:**
+
 ```bash
+
 # Install kube-bench
+
 kubectl apply -f https://raw.githubusercontent.com/aquasecurity/kube-bench/main/job.yaml
 
 # Check results
+
 kubectl logs job/kube-bench
 ```
 
@@ -189,14 +212,19 @@ kubectl logs job/kube-bench
 - Latest security updates
 
 **Additional hardening recommendations:**
+
 ```yaml
+
 # In ansible/roles/common/tasks/main.yml
+
 - name: Configure fail2ban
+
   apt:
     name: fail2ban
     state: present
 
 - name: Install security updates automatically
+
   apt:
     name: unattended-upgrades
     state: present
@@ -212,6 +240,7 @@ kubectl logs job/kube-bench
 - Includes all API requests
 
 **View audit logs:**
+
 ```bash
 ssh azureuser@<control-plane-ip>
 sudo tail -f /var/lib/rancher/rke2/server/logs/audit.log | jq
@@ -220,20 +249,28 @@ sudo tail -f /var/lib/rancher/rke2/server/logs/audit.log | jq
 #### Security Monitoring Tools
 
 **Falco (Runtime Security):**
+
 ```bash
+
 # Install Falco
+
 kubectl apply -f https://raw.githubusercontent.com/falcosecurity/falco/master/deploy/kubernetes/falco-daemonset-configmap.yaml
 
 # View alerts
+
 kubectl logs -n falco -l app=falco
 ```
 
 **Trivy (Vulnerability Scanning):**
+
 ```bash
+
 # Scan cluster
+
 trivy k8s --report summary cluster
 
 # Scan specific namespace
+
 trivy k8s --report summary namespace/production
 ```
 
@@ -251,14 +288,18 @@ trivy k8s --report summary namespace/production
 - Azure disk encryption for VM disks (optional)
 
 Enable Azure disk encryption:
+
 ```terraform
 resource "azurerm_linux_virtual_machine" "vm" {
+
   # ... other config
-  
+
   encryption_at_host_enabled = true
-  
+
   os_disk {
+
     # ... other config
+
     security_encryption_type = "VMGuestStateOnly"
   }
 }
@@ -267,7 +308,9 @@ resource "azurerm_linux_virtual_machine" "vm" {
 #### Backup & Recovery
 
 **etcd Backup:**
+
 ```bash
+
 # Automated backup script
 #!/bin/bash
 BACKUP_DIR="/backups/etcd"
@@ -275,16 +318,20 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 sudo /var/lib/rancher/rke2/bin/etcdctl snapshot save \
   "${BACKUP_DIR}/etcd-${TIMESTAMP}.db" \
+
   --cacert /var/lib/rancher/rke2/server/tls/etcd/server-ca.crt \
   --cert /var/lib/rancher/rke2/server/tls/etcd/server-client.crt \
   --key /var/lib/rancher/rke2/server/tls/etcd/server-client.key
 
 # Upload to Azure Blob Storage
+
 az storage blob upload \
+
   --account-name <storage-account> \
   --container-name etcd-backups \
   --file "${BACKUP_DIR}/etcd-${TIMESTAMP}.db" \
   --name "etcd-${TIMESTAMP}.db"
+
 ```
 
 ### Security Checklist
@@ -331,19 +378,25 @@ az storage blob upload \
    - Set up automated alerting
 
 2. **Containment**
+
    ```bash
+
    # Isolate affected node
+
    kubectl cordon <node-name>
    kubectl drain <node-name> --ignore-daemonsets
-   
+
    # Block network access
+
    az network nsg rule create \
+
      --resource-group <rg-name> \
      --nsg-name <nsg-name> \
      --name DenyAll \
      --priority 100 \
      --direction Inbound \
      --access Deny
+
    ```
 
 3. **Investigation**

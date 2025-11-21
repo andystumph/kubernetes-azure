@@ -7,6 +7,7 @@ This project provides a complete infrastructure-as-code solution for deploying a
 ## What's Been Created
 
 ### ✅ Core Infrastructure
+
 - **Dev Container Configuration**: Full development environment using `astumph/iac` image
 - **Terraform Infrastructure**: Complete Azure infrastructure provisioning
   - Virtual Network with secure networking
@@ -20,6 +21,7 @@ This project provides a complete infrastructure-as-code solution for deploying a
   - Static inventory generated from Terraform outputs
 
 ### ✅ Security Features
+
 - No secrets in code (environment variable based)
 - Network isolation with NSGs
 - SSH key-only authentication
@@ -29,6 +31,7 @@ This project provides a complete infrastructure-as-code solution for deploying a
 - RBAC and Pod Security Policies
 
 ### ✅ Documentation
+
 - Comprehensive README with quick start
 - Detailed setup guide
 - Step-by-step deployment guide
@@ -37,12 +40,14 @@ This project provides a complete infrastructure-as-code solution for deploying a
 - CI/CD pipeline documentation
 
 ### ✅ Automation
+
 - Azure Developer CLI (azd) integration
 - Deployment scripts
 - Inventory generation
 - Automated kubeconfig retrieval
 
 ### ✅ CI/CD Pipeline
+
 - GitHub Actions workflow for automated testing
 - Terraform validation and linting (fmt, validate, tflint)
 - Terraform security scanning (tfsec, Checkov)
@@ -56,7 +61,7 @@ This project provides a complete infrastructure-as-code solution for deploying a
 
 ## Project Structure
 
-```
+```text
 kubernetes-azure/
 ├── .devcontainer/
 │   └── devcontainer.json          # Dev container configuration
@@ -111,34 +116,44 @@ kubernetes-azure/
 ## Quick Start
 
 ### Prerequisites
+
 1. Docker Desktop
 2. VS Code with Dev Containers extension
 3. Azure subscription
 4. Service principal credentials
 
 ### Deployment (3 Steps)
+
 ```bash
+
 # 1. Configure environment
+
 cp .env.example .env
+
 # Edit .env with your credentials
 
 # 2. Open in dev container
+
 code .
+
 # Press F1 → "Reopen in Container"
 
 # 3. Deploy
+
 azd up
 ```
 
 ## Key Features
 
 ### Infrastructure
+
 - **Configurable**: Easily adjust VM count, size, and region
 - **Secure by Default**: NSG rules, encryption, audit logging
 - **Cost-Optimized**: D-series VMs, efficient resource allocation
 - **Production-Ready**: High availability, monitoring, backups
 
 ### Kubernetes
+
 - **RKE2 Distribution**: Enterprise-grade Kubernetes
 - **Containerd Runtime**: Lightweight and efficient
 - **CIS Hardened**: Security compliance built-in
@@ -146,6 +161,7 @@ azd up
 - **Version Pinning**: Control Kubernetes version
 
 ### Developer Experience
+
 - **Dev Container**: Consistent environment
 - **One Command Deploy**: `azd up`
 - **Automated Configuration**: Ansible handles all setup
@@ -154,22 +170,28 @@ azd up
 ## Configuration Options
 
 ### Environment Variables (.env)
+
 ```bash
+
 # Azure
+
 AZURE_SUBSCRIPTION_ID=...
 AZURE_LOCATION=eastus
 
 # Credentials
+
 ARM_CLIENT_ID=...
 ARM_CLIENT_SECRET=...
 SSH_PUBLIC_KEY=...
 
 # Cluster
+
 VM_COUNT=3                    # Total VMs (1 CP + workers)
 RKE2_VERSION=v1.28.5+rke2r1  # Kubernetes version
 ```
 
 ### Terraform Variables
+
 - `vm_size`: Azure VM SKU (default: Standard_D4s_v5)
 - `vnet_address_space`: VNet CIDR (default: 10.0.0.0/16)
 - `allowed_ssh_cidrs`: SSH access IPs (default: 0.0.0.0/0)
@@ -182,64 +204,79 @@ RKE2_VERSION=v1.28.5+rke2r1  # Kubernetes version
   - etcd database
   - Controller manager
   - Scheduler
-  
+
 - **Workers**: 2 nodes
   - Container workloads
   - Auto-scaling capable
 
-- **Network**: 
+- **Network**:
   - Pod CIDR: 10.42.0.0/16
   - Service CIDR: 10.43.0.0/16
   - CNI: Cilium
 
 ## Security Highlights
 
-✅ **No Secrets in Code**: All sensitive data in `.env`  
-✅ **Network Isolation**: Dedicated VNet with NSGs  
-✅ **Encrypted**: Secrets at rest, TLS in transit  
-✅ **Audited**: API server audit logging  
-✅ **Hardened**: CIS Kubernetes Benchmark compliance  
-✅ **RBAC Enabled**: Fine-grained access control  
-✅ **SSH Keys Only**: No password authentication  
+✅ **No Secrets in Code**: All sensitive data in `.env`
+✅ **Network Isolation**: Dedicated VNet with NSGs
+✅ **Encrypted**: Secrets at rest, TLS in transit
+✅ **Audited**: API server audit logging
+✅ **Hardened**: CIS Kubernetes Benchmark compliance
+✅ **RBAC Enabled**: Fine-grained access control
+✅ **SSH Keys Only**: No password authentication
 
 ## Common Operations
 
 ### Deploy
+
 ```bash
 azd up
+
 # or
+
 ./scripts/deploy.sh
 ```
 
 ### Access Cluster
+
 ```bash
 export KUBECONFIG=$(pwd)/kubeconfig
 kubectl get nodes
 ```
 
 ### Scale Workers
+
 ```bash
+
 # Edit .env
+
 VM_COUNT=5
 
 # Redeploy
+
 azd up
 ```
 
 ### Update Kubernetes
+
 ```bash
+
 # Edit .env
+
 RKE2_VERSION=v1.29.0+rke2r1
 
 # Redeploy
+
 cd ansible
 ansible-playbook -i inventory/hosts.yml playbooks/site.yml
 ```
 
 ### Destroy
+
 ```bash
 azd down
+
 # or
+
 ./scripts/destroy.sh
 ```
 
@@ -271,7 +308,7 @@ See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues and sol
 
 ## Architecture Diagram
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                    Azure Subscription                    │
 │  ┌───────────────────────────────────────────────────┐  │
