@@ -2,7 +2,7 @@
 
 [![CI/CD Pipeline](https://github.com/andystumph/kubernetes-azure/actions/workflows/ci.yml/badge.svg)](https://github.com/andystumph/kubernetes-azure/actions/workflows/ci.yml)
 
-This project provisions a production-ready Kubernetes cluster on Azure using RKE2 (Rancher Kubernetes Engine 2) with infrastructure-as-code practices.
+This is an educational project demonstrating how to provision a Kubernetes cluster on Azure using RKE2 (Rancher Kubernetes Engine 2) with infrastructure-as-code practices. It's designed for learning and experimentation, not for production use.
 
 ## 🏗️ Architecture
 
@@ -336,7 +336,7 @@ terraform destroy
 
 ## 📝 License
 
-This project is provided as-is for educational and production use.
+This project is provided as-is for educational purposes only. It is not intended for production use.
 
 ## 🆘 Support
 

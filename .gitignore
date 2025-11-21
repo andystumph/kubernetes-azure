@@ -31,6 +31,7 @@ terraform.rc
 *.retry
 ansible/.vault_pass
 ansible/inventory/hosts.yml
+.ansible/.lock
 
 # Azure
 .azure/
